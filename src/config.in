@@ -1,0 +1,16 @@
+ngx_addon_name=ngx_openidc_module
+
+if test -n "$ngx_module_link"; then
+    ngx_module_type=HTTP
+    ngx_module_name=ngx_openidc_module
+    ngx_module_incs="@OAUTH2_CFLAGS@ @OAUTH2_NGINX_CFLAGS@"
+    ngx_module_libs="@OAUTH2_LIBS@ @OAUTH2_NGINX_LIBS@"
+    ngx_module_srcs="$ngx_addon_dir/ngx_openidc_module.c"
+
+    . auto/module
+else
+    HTTP_MODULES="$HTTP_MODULES ngx_openidc_module"
+    HTTP_INCS="$HTTP_INCS @OAUTH2_CFLAGS@ @OAUTH2_NGINX_CFLAGS@"
+    CORE_LIBS="$CORE_LIBS @OAUTH2_LIBS@ @OAUTH2_NGINX_LIBS@"
+    NGX_ADDON_SRCS="$NGX_ADDON_SRCS $ngx_addon_dir/ngx_openidc_module.c"
+fi
