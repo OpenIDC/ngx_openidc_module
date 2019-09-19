@@ -31,6 +31,7 @@
 #include <oauth2/mem.h>
 #include <oauth2/nginx.h>
 #include <oauth2/oauth2.h>
+#include <oauth2/openidc.h>
 #include <oauth2/version.h>
 
 typedef struct ngx_openidc_claim_t {
@@ -41,12 +42,15 @@ typedef struct ngx_openidc_claim_t {
 
 typedef struct ngx_openidc_cfg_t {
 	ngx_conf_t *cf;
+	oauth2_cfg_openidc_t *openidc;
 	ngx_openidc_claim_t *claims;
 } ngx_openidc_cfg_t;
 
 static void ngx_openidc_cleanup(void *data)
 {
-	// ngx_openidc_cfg_t *cfg = (ngx_openidc_cfg_t *)data;
+	ngx_openidc_cfg_t *cfg = (ngx_openidc_cfg_t *)data;
+	if (cfg->openidc)
+		oauth2_cfg_openidc_free(NULL, cfg->openidc);
 }
 
 static void *ngx_openidc_create_loc_conf(ngx_conf_t *cf)
@@ -56,6 +60,10 @@ static void *ngx_openidc_create_loc_conf(ngx_conf_t *cf)
 
 	cfg = ngx_pnalloc(cf->pool, sizeof(ngx_openidc_cfg_t));
 	cfg->cf = cf;
+
+	cfg->openidc = oauth2_cfg_openidc_init(NULL);
+	;
+	cfg->claims = NULL;
 
 	// TODO: correct level
 	// oauth2_log_t *log = oauth2_log_init(OAUTH2_LOG_TRACE1, NULL);
@@ -75,17 +83,21 @@ end:
 static char *ngx_openidc_merge_loc_conf(ngx_conf_t *cf, void *parent,
 					void *child)
 {
-	// ngx_openidc_cfg_t *prev = parent;
+	ngx_openidc_cfg_t *prev = parent;
 	ngx_openidc_cfg_t *cfg = child;
 
 	cfg->cf = cf;
 
+	// TODO:...
+	oauth2_cfg_openidc_merge(NULL, cfg->openidc, prev->openidc,
+				 cfg->openidc);
+
 	return NGX_CONF_OK;
 }
-/*
+
 static ngx_int_t ngx_openidc_claim_variable(ngx_http_request_t *r,
-					   ngx_http_variable_value_t *v,
-					   uintptr_t data)
+					    ngx_http_variable_value_t *v,
+					    uintptr_t data)
 {
 	ngx_openidc_claim_t *claim = (ngx_openidc_claim_t *)data;
 
@@ -112,7 +124,7 @@ static ngx_int_t ngx_openidc_claim_variable(ngx_http_request_t *r,
 }
 
 static char *ngx_openidc_claim_command(ngx_conf_t *cf, ngx_command_t *cmd,
-				      void *conf)
+				       void *conf)
 {
 	char *rv = NGX_CONF_ERROR;
 	// ngx_http_core_loc_conf_t *clcf = NULL;
@@ -161,9 +173,42 @@ end:
 
 	return rv;
 }
-*/
+
+OAUTH2_NGINX_CFG_FUNC_START(ngx_openidc_cfg_t, dummy, openidc_cfg, openidc)
+
+char *v1 = cf->args->nelts > 1 ? oauth2_strndup((const char *)value[1].data,
+						(size_t)value[1].len)
+			       : NULL;
+char *v2 = cf->args->nelts > 2 ? oauth2_strndup((const char *)value[2].data,
+						(size_t)value[2].len)
+			       : NULL;
+char *v3 = cf->args->nelts > 3 ? oauth2_strndup((const char *)value[3].data,
+						(size_t)value[3].len)
+			       : NULL;
+
+rv = oauth2_cfg_openidc_provider_resolver_set_options(NULL, cfg->openidc, v1,
+						      v2, v3);
+
+oauth2_mem_free(v3);
+oauth2_mem_free(v2);
+oauth2_mem_free(v1);
+
+OAUTH2_NGINX_CFG_FUNC_END(cf, rv)
+
+#define NGINX_OAUTH2_CMD_TAKE(nargs, primitive, member)                        \
+	OAUTH2_NGINX_CMD_TAKE##nargs(openidc_cfg, primitive, member)
+
 // clang-format off
 static ngx_command_t ngx_openidc_commands[] = {
+	NGINX_OAUTH2_CMD_TAKE(123, "OpenIDCProviderResolver", openidc),
+	{
+		ngx_string("OpenIDCClaim"),
+		NGX_HTTP_LOC_CONF | NGX_CONF_TAKE2,
+		ngx_openidc_claim_command,
+		NGX_HTTP_LOC_CONF_OFFSET,
+		0,
+		NULL
+	},
 	ngx_null_command
 };
 
@@ -228,7 +273,7 @@ end:
 
 	return rv;
 }
-/*
+
 static void ngx_set_target_variable(ngx_openidc_cfg_t *cfg,
 				    oauth2_nginx_request_context_t *ctx,
 				    const char *key, const char *val)
@@ -273,14 +318,41 @@ static void ngx_set_target_variables(ngx_openidc_cfg_t *cfg,
 		iter = json_object_iter_next(json_token, iter);
 	}
 }
-*/
+
+bool oauth2_nginx_response_header_set(oauth2_log_t *log, void *rec,
+				      const char *name, const char *value)
+{
+	bool rc = false;
+	ngx_table_elt_t *h = NULL;
+	ngx_http_request_t *r = (ngx_http_request_t *)rec;
+
+	h = ngx_list_push(&r->headers_out.headers);
+	if (h == NULL)
+		goto end;
+
+	h->hash = 1;
+	h->key.len = strlen(name);
+	h->key.data = ngx_palloc(r->pool, h->key.len);
+	memcpy(h->key.data, name, h->key.len);
+	h->value.len = strlen(value);
+	h->value.data = ngx_palloc(r->pool, h->value.len);
+	memcpy(h->value.data, value, h->value.len);
+
+	rc = true;
+
+end:
+
+	return rc;
+}
 
 static ngx_int_t ngx_openidc_handler(ngx_http_request_t *r)
 {
 	ngx_int_t rv = NGX_DECLINED;
-	// bool rc = false;
+	bool rc = false;
 	oauth2_nginx_request_context_t *ctx = NULL;
 	ngx_openidc_cfg_t *cfg = NULL;
+	oauth2_http_response_t *response = NULL;
+	json_t *claims = NULL;
 
 	if (r != r->main)
 		goto end;
@@ -293,7 +365,6 @@ static ngx_int_t ngx_openidc_handler(ngx_http_request_t *r)
 		rv = NGX_ERROR;
 		goto end;
 	}
-
 	ctx = oauth2_nginx_request_context_init(r);
 	if (ctx == NULL) {
 		oauth2_warn(ctx->log,
@@ -302,17 +373,69 @@ static ngx_int_t ngx_openidc_handler(ngx_http_request_t *r)
 		goto end;
 	}
 
-	// ngx_set_target_variables(cfg, ctx, json_payload);
+	// TODO:
+	oauth2_http_request_scheme_set(ctx->log, ctx->request, "http");
+	char *v = NULL;
+	if (r->uri.len > 0) {
+		v = oauth2_strndup((const char *)r->uri.data, r->uri.len);
+		oauth2_http_request_path_set(ctx->log, ctx->request, v);
+		oauth2_mem_free(v);
+	};
 
-	rv = NGX_OK;
+	if (r->args.len > 0) {
+		v = oauth2_strndup((const char *)r->args.data, r->args.len);
+		oauth2_http_request_query_set(ctx->log, ctx->request, v);
+		oauth2_mem_free(v);
+	}
+
+	oauth2_debug(ctx->log, "enter");
+
+	// TODO: we can move this up to avoid overhead (and have no logs...)
+	if ((cfg->openidc == NULL) || oauth2_cfg_openidc_provider_resolver_get(
+					  ctx->log, cfg->openidc) == NULL)
+		goto end;
+
+	// TODO:
+	oauth2_cfg_openidc_passphrase_set(ctx->log, cfg->openidc,
+					  "password1234");
+
+	rc = oauth2_openidc_handle(ctx->log, cfg->openidc, ctx->request,
+				   &response, &claims);
+
+	if (rc == false) {
+		oauth2_warn(ctx->log, "oauth2_openidc_handle failed");
+		rv = NGX_ERROR;
+		goto end;
+	}
+
+	ngx_set_target_variables(cfg, ctx, claims);
+
+	// TODO: why can we not use the functions from nginx.h (static
+	// functions? dynamic linking?)
+	oauth2_http_response_headers_loop(ctx->log, response,
+					  oauth2_nginx_response_header_set, r);
+	r->headers_out.status =
+	    oauth2_http_response_status_code_get(ctx->log, response);
+
+	// rv = ngx_http_send_header(r);
+
+	// rv = oauth2_nginx_http_response_set(ctx->log, response, r);
+
+	rv = (r->headers_out.status == 302) ? NGX_HTTP_MOVED_TEMPORARILY
+					    : NGX_OK;
 
 end:
 
-	// hereafter we destroy the log object...
-	oauth2_debug(ctx->log, "leave: %d", rv);
+	if (claims)
+		json_decref(claims);
 
-	if (ctx)
+	if (ctx) {
+		if (response)
+			oauth2_http_response_free(ctx->log, response);
+		// hereafter we destroy the log object...
+		oauth2_debug(ctx->log, "leave: %d", rv);
 		oauth2_nginx_request_context_free(ctx);
+	}
 
 	return rv;
 }
