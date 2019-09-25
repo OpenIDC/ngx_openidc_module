@@ -345,6 +345,11 @@ end:
 	return rc;
 }
 
+/*
+ * TODO
+ */
+OAUTH2_NGINX_REQUEST_COPY_HACK
+
 static ngx_int_t ngx_openidc_handler(ngx_http_request_t *r)
 {
 	ngx_int_t rv = NGX_DECLINED;
@@ -374,7 +379,10 @@ static ngx_int_t ngx_openidc_handler(ngx_http_request_t *r)
 	}
 
 	// TODO:
+	_oauth2_nginx_request_copy(ctx);
 	oauth2_http_request_scheme_set(ctx->log, ctx->request, "http");
+
+	/*
 	char *v = NULL;
 	if (r->uri.len > 0) {
 		v = oauth2_strndup((const char *)r->uri.data, r->uri.len);
@@ -387,7 +395,7 @@ static ngx_int_t ngx_openidc_handler(ngx_http_request_t *r)
 		oauth2_http_request_query_set(ctx->log, ctx->request, v);
 		oauth2_mem_free(v);
 	}
-
+	*/
 	oauth2_debug(ctx->log, "enter");
 
 	// TODO: we can move this up to avoid overhead (and have no logs...)
