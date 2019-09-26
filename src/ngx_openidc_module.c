@@ -345,11 +345,6 @@ end:
 	return rc;
 }
 
-/*
- * TODO
- */
-OAUTH2_NGINX_REQUEST_COPY_HACK
-
 static ngx_int_t ngx_openidc_handler(ngx_http_request_t *r)
 {
 	ngx_int_t rv = NGX_DECLINED;
@@ -378,8 +373,6 @@ static ngx_int_t ngx_openidc_handler(ngx_http_request_t *r)
 		goto end;
 	}
 
-	// TODO:
-	_oauth2_nginx_request_copy(ctx);
 	oauth2_http_request_scheme_set(ctx->log, ctx->request, "http");
 
 	/*
