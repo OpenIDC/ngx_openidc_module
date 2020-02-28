@@ -22,7 +22,7 @@ populates configuration variables based on available claims
       location /openid-connect {
             # for now this file should contain the "client_id" and "client_secret"
             # settings in addition to the provider Discovery metadata
-			OpenIDCProviderResolver file /etc/nginx/conf.d/provider.json;
+            OpenIDCProviderResolver file /etc/nginx/conf.d/provider.json;
 			
             OpenIDCClaim sub $pfc_claim_sub;
 
