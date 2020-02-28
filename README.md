@@ -5,12 +5,30 @@ variables based on the information provided in the ID Token and returned from th
 
 ## Configuration 
 
-```
-```
+TODO
+
+`OpenIDCProviderResolver`  
+configures the provider/client settings from a JSON file
+
+`OpenIDCClaim`  
+populates configuration variables based on available claims
+
+```nginx
+ ```
 
 ## Samples
 
-```
+```nginx
+      location /openid-connect {
+            # for now this file should contain the "client_id" and "client_secret"
+            # settings in addition to the provider Discovery metadata
+			OpenIDCProviderResolver file /etc/nginx/conf.d/provider.json;
+			
+            OpenIDCClaim sub $pfc_claim_sub;
+
+            proxy_set_header OAUTH2_CLAIM_sub $pfc_claim_sub;
+            proxy_pass http://echo:8080/headers$is_args$args;
+        }
 ```
 
 ## Support
