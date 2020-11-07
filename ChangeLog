@@ -1,2 +1,6 @@
+11/07/2020
+- depend on liboauth2 >= 1.4.0
+- bump to 3.2.0-dev
+
 09/18/2019
 - initial import
