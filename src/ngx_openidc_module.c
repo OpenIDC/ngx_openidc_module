@@ -32,6 +32,7 @@
 #include <oauth2/nginx.h>
 #include <oauth2/oauth2.h>
 #include <oauth2/openidc.h>
+#include <oauth2/session.h>
 #include <oauth2/version.h>
 
 typedef struct ngx_openidc_claim_t {
@@ -201,7 +202,15 @@ OAUTH2_NGINX_CFG_FUNC_END(cf, rv)
 static const char *openidc_cfg_set_cache(void *dummy, const char *v1,
 					 const char *v2)
 {
-	return oauth2_cfg_set_cache(dummy, v1, v2);
+	return oauth2_cfg_set_cache(NULL, v1, v2);
+}
+
+static const char *openidc_cfg_set_session(void *dummy, const char *type,
+					   const char *options)
+{
+	oauth2_cfg_session_t *session_cfg = NULL;
+	session_cfg = oauth2_cfg_session_init(NULL);
+	return oauth2_cfg_session_set_options(NULL, session_cfg, type, options);
 }
 
 #define NGINX_OPENIDC_FUNC_ARGS(nargs, primitive)                              \
@@ -209,6 +218,7 @@ static const char *openidc_cfg_set_cache(void *dummy, const char *v1,
 					  primitive)
 
 NGINX_OPENIDC_FUNC_ARGS(2, cache);
+NGINX_OPENIDC_FUNC_ARGS(2, session);
 
 #define NGINX_OAUTH2_CMD_TAKE(nargs, primitive, member)                        \
 	OAUTH2_NGINX_CMD_TAKE##nargs(openidc_cfg, primitive, member)
@@ -216,6 +226,7 @@ NGINX_OPENIDC_FUNC_ARGS(2, cache);
 // clang-format off
 static ngx_command_t ngx_openidc_commands[] = {
 	NGINX_OAUTH2_CMD_TAKE(12, "OpenIDCCache", cache),
+	NGINX_OAUTH2_CMD_TAKE(12, "OpenIDCSession", session),
 	NGINX_OAUTH2_CMD_TAKE(123, "OpenIDCProviderResolver", openidc),
 	{
 		ngx_string("OpenIDCClaim"),
