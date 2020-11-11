@@ -44,6 +44,9 @@ typedef struct ngx_openidc_cfg_t {
 	ngx_conf_t *cf;
 	oauth2_cfg_openidc_t *openidc;
 	ngx_openidc_claim_t *claims;
+	// TODO: dummy to satisfy the NGINX macro... (passed as "log" parameter
+	// to oauth2_cfg_set_cache)
+	void *cfg;
 } ngx_openidc_cfg_t;
 
 static void ngx_openidc_cleanup(void *data)
@@ -195,11 +198,24 @@ oauth2_mem_free(v1);
 
 OAUTH2_NGINX_CFG_FUNC_END(cf, rv)
 
+static const char *openidc_cfg_set_cache(void *dummy, const char *v1,
+					 const char *v2)
+{
+	return oauth2_cfg_set_cache(dummy, v1, v2);
+}
+
+#define NGINX_OPENIDC_FUNC_ARGS(nargs, primitive)                              \
+	OAUTH2_NGINX_CFG_FUNC_ARGS##nargs(ngx_openidc_cfg_t, cfg, openidc_cfg, \
+					  primitive)
+
+NGINX_OPENIDC_FUNC_ARGS(2, cache);
+
 #define NGINX_OAUTH2_CMD_TAKE(nargs, primitive, member)                        \
 	OAUTH2_NGINX_CMD_TAKE##nargs(openidc_cfg, primitive, member)
 
 // clang-format off
 static ngx_command_t ngx_openidc_commands[] = {
+	NGINX_OAUTH2_CMD_TAKE(12, "OpenIDCCache", cache),
 	NGINX_OAUTH2_CMD_TAKE(123, "OpenIDCProviderResolver", openidc),
 	{
 		ngx_string("OpenIDCClaim"),
