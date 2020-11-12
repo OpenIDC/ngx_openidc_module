@@ -205,6 +205,18 @@ static const char *openidc_cfg_set_cache(void *dummy, const char *v1,
 	return oauth2_cfg_set_cache(NULL, v1, v2);
 }
 
+OAUTH2_NGINX_CFG_FUNC_START(ngx_openidc_cfg_t, dummy, openidc_cfg, client)
+char *v1 = cf->args->nelts > 1 ? oauth2_strndup((const char *)value[1].data,
+						(size_t)value[1].len)
+			       : NULL;
+char *v2 = cf->args->nelts > 2 ? oauth2_strndup((const char *)value[2].data,
+						(size_t)value[2].len)
+			       : NULL;
+rv = oauth2_openidc_client_set_options(NULL, cfg->openidc, v1, v2);
+oauth2_mem_free(v2);
+oauth2_mem_free(v1);
+OAUTH2_NGINX_CFG_FUNC_END(cf, rv)
+
 static const char *openidc_cfg_set_session(void *dummy, const char *type,
 					   const char *options)
 {
@@ -226,6 +238,7 @@ NGINX_OPENIDC_FUNC_ARGS(2, session);
 // clang-format off
 static ngx_command_t ngx_openidc_commands[] = {
 	NGINX_OAUTH2_CMD_TAKE(12, "OpenIDCCache", cache),
+	NGINX_OAUTH2_CMD_TAKE(12, "OpenIDCClient", client),
 	NGINX_OAUTH2_CMD_TAKE(12, "OpenIDCSession", session),
 	NGINX_OAUTH2_CMD_TAKE(123, "OpenIDCProviderResolver", openidc),
 	{
