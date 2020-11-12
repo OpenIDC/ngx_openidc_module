@@ -25,7 +25,7 @@ populates configuration variables based on available claims
       location /openid-connect {
             # reference to provider Discovery metadata
             OpenIDCProviderResolver file /etc/nginx/conf.d/provider.json;
-			OpenIDCClient openidc0 client_id=openidc0&client_secret=secret&scope=openid%20profile&token_endpoint_auth_method=client_secret_basic&ssl_verify=false;
+            OpenIDCClient openidc0 client_id=openidc0&client_secret=secret&scope=openid%20profile&token_endpoint_auth_method=client_secret_basic&ssl_verify=false;
 
             OpenIDCClaim sub $pfc_claim_sub;
 
