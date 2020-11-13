@@ -225,18 +225,26 @@ static const char *openidc_cfg_set_session(void *dummy, const char *type,
 	return oauth2_cfg_session_set_options(NULL, session_cfg, type, options);
 }
 
+static const char *openidc_cfg_set_passphrase(void *dummy,
+					      const char *passphrase)
+{
+	return oauth2_crypto_passphrase_set(NULL, passphrase);
+}
+
 #define NGINX_OPENIDC_FUNC_ARGS(nargs, primitive)                              \
 	OAUTH2_NGINX_CFG_FUNC_ARGS##nargs(ngx_openidc_cfg_t, cfg, openidc_cfg, \
 					  primitive)
 
 NGINX_OPENIDC_FUNC_ARGS(2, cache);
 NGINX_OPENIDC_FUNC_ARGS(2, session);
+NGINX_OPENIDC_FUNC_ARGS(1, passphrase);
 
 #define NGINX_OAUTH2_CMD_TAKE(nargs, primitive, member)                        \
 	OAUTH2_NGINX_CMD_TAKE##nargs(openidc_cfg, primitive, member)
 
 // clang-format off
 static ngx_command_t ngx_openidc_commands[] = {
+	NGINX_OAUTH2_CMD_TAKE(1, "OpenIDCCryptoPassphrase", passphrase),
 	NGINX_OAUTH2_CMD_TAKE(12, "OpenIDCCache", cache),
 	NGINX_OAUTH2_CMD_TAKE(12, "OpenIDCClient", client),
 	NGINX_OAUTH2_CMD_TAKE(12, "OpenIDCSession", session),
@@ -435,10 +443,6 @@ static ngx_int_t ngx_openidc_handler(ngx_http_request_t *r)
 	if ((cfg->openidc == NULL) || oauth2_cfg_openidc_provider_resolver_get(
 					  ctx->log, cfg->openidc) == NULL)
 		goto end;
-
-	// TODO:
-	oauth2_cfg_openidc_passphrase_set(ctx->log, cfg->openidc,
-					  "password1234");
 
 	rc = oauth2_openidc_handle(ctx->log, cfg->openidc, ctx->request,
 				   &response, &claims);
