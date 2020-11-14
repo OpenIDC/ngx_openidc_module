@@ -45,9 +45,8 @@ typedef struct ngx_openidc_cfg_t {
 	ngx_conf_t *cf;
 	oauth2_cfg_openidc_t *openidc;
 	ngx_openidc_claim_t *claims;
-	// TODO: dummy to satisfy the NGINX macro... (passed as "log" parameter
-	// to oauth2_cfg_set_cache)
-	void *cfg;
+	// TODO:
+	oauth2_log_t *log;
 } ngx_openidc_cfg_t;
 
 static void ngx_openidc_cleanup(void *data)
@@ -63,6 +62,7 @@ static void *ngx_openidc_create_loc_conf(ngx_conf_t *cf)
 	ngx_pool_cleanup_t *cln = NULL;
 
 	cfg = ngx_pnalloc(cf->pool, sizeof(ngx_openidc_cfg_t));
+	cfg->log = NULL;
 	cfg->cf = cf;
 
 	cfg->openidc = oauth2_cfg_openidc_init(NULL);
@@ -127,8 +127,8 @@ static ngx_int_t ngx_openidc_claim_variable(ngx_http_request_t *r,
 	return NGX_OK;
 }
 
-static char *ngx_openidc_claim_command(ngx_conf_t *cf, ngx_command_t *cmd,
-				       void *conf)
+static char *ngx_openidc_set_claim(ngx_conf_t *cf, ngx_command_t *cmd,
+				   void *conf)
 {
 	char *rv = NGX_CONF_ERROR;
 	// ngx_http_core_loc_conf_t *clcf = NULL;
@@ -178,89 +178,31 @@ end:
 	return rv;
 }
 
-OAUTH2_NGINX_CFG_FUNC_START(ngx_openidc_cfg_t, dummy, openidc_cfg, openidc)
+OAUTH2_NGINX_CFG_FUNC_ARGS1(openidc, ngx_openidc_cfg_t, passphrase,
+			    oauth2_crypto_passphrase_set, NULL)
+OAUTH2_NGINX_CFG_FUNC_ARGS2(openidc, ngx_openidc_cfg_t, cache,
+			    oauth2_cfg_set_cache, NULL)
+OAUTH2_NGINX_CFG_FUNC_ARGS3(openidc, ngx_openidc_cfg_t, provider_resolver,
+			    oauth2_cfg_openidc_provider_resolver_set_options,
+			    cfg->openidc)
+OAUTH2_NGINX_CFG_FUNC_ARGS2(openidc, ngx_openidc_cfg_t, client,
+			    oauth2_openidc_client_set_options, cfg->openidc)
+OAUTH2_NGINX_CFG_FUNC_ARGS2(openidc, ngx_openidc_cfg_t, session,
+			    oauth2_cfg_session_set_options, NULL)
 
-char *v1 = cf->args->nelts > 1 ? oauth2_strndup((const char *)value[1].data,
-						(size_t)value[1].len)
-			       : NULL;
-char *v2 = cf->args->nelts > 2 ? oauth2_strndup((const char *)value[2].data,
-						(size_t)value[2].len)
-			       : NULL;
-char *v3 = cf->args->nelts > 3 ? oauth2_strndup((const char *)value[3].data,
-						(size_t)value[3].len)
-			       : NULL;
-
-rv = oauth2_cfg_openidc_provider_resolver_set_options(NULL, cfg->openidc, v1,
-						      v2, v3);
-
-oauth2_mem_free(v3);
-oauth2_mem_free(v2);
-oauth2_mem_free(v1);
-
-OAUTH2_NGINX_CFG_FUNC_END(cf, rv)
-
-static const char *openidc_cfg_set_cache(void *dummy, const char *v1,
-					 const char *v2)
-{
-	return oauth2_cfg_set_cache(NULL, v1, v2);
-}
-
-OAUTH2_NGINX_CFG_FUNC_START(ngx_openidc_cfg_t, dummy, openidc_cfg, client)
-char *v1 = cf->args->nelts > 1 ? oauth2_strndup((const char *)value[1].data,
-						(size_t)value[1].len)
-			       : NULL;
-char *v2 = cf->args->nelts > 2 ? oauth2_strndup((const char *)value[2].data,
-						(size_t)value[2].len)
-			       : NULL;
-rv = oauth2_openidc_client_set_options(NULL, cfg->openidc, v1, v2);
-oauth2_mem_free(v2);
-oauth2_mem_free(v1);
-OAUTH2_NGINX_CFG_FUNC_END(cf, rv)
-
-static const char *openidc_cfg_set_session(void *dummy, const char *type,
-					   const char *options)
-{
-	oauth2_cfg_session_t *session_cfg = NULL;
-	session_cfg = oauth2_cfg_session_init(NULL);
-	return oauth2_cfg_session_set_options(NULL, session_cfg, type, options);
-}
-
-static const char *openidc_cfg_set_passphrase(void *dummy,
-					      const char *passphrase)
-{
-	return oauth2_crypto_passphrase_set(NULL, passphrase);
-}
-
-#define NGINX_OPENIDC_FUNC_ARGS(nargs, primitive)                              \
-	OAUTH2_NGINX_CFG_FUNC_ARGS##nargs(ngx_openidc_cfg_t, cfg, openidc_cfg, \
-					  primitive)
-
-NGINX_OPENIDC_FUNC_ARGS(2, cache);
-NGINX_OPENIDC_FUNC_ARGS(2, session);
-NGINX_OPENIDC_FUNC_ARGS(1, passphrase);
-
-#define NGINX_OAUTH2_CMD_TAKE(nargs, primitive, member)                        \
-	OAUTH2_NGINX_CMD_TAKE##nargs(openidc_cfg, primitive, member)
-
-// clang-format off
 static ngx_command_t ngx_openidc_commands[] = {
-	NGINX_OAUTH2_CMD_TAKE(1, "OpenIDCCryptoPassphrase", passphrase),
-	NGINX_OAUTH2_CMD_TAKE(12, "OpenIDCCache", cache),
-	NGINX_OAUTH2_CMD_TAKE(12, "OpenIDCClient", client),
-	NGINX_OAUTH2_CMD_TAKE(12, "OpenIDCSession", session),
-	NGINX_OAUTH2_CMD_TAKE(123, "OpenIDCProviderResolver", openidc),
-	{
-		ngx_string("OpenIDCClaim"),
-		NGX_HTTP_LOC_CONF | NGX_CONF_TAKE2,
-		ngx_openidc_claim_command,
-		NGX_HTTP_LOC_CONF_OFFSET,
-		0,
-		NULL
-	},
-	ngx_null_command
-};
+    OAUTH2_NGINX_CMD(1, openidc, "OpenIDCCryptoPassphrase", passphrase),
+    OAUTH2_NGINX_CMD(12, openidc, "OAuth2Cache", cache),
+    OAUTH2_NGINX_CMD(12, openidc, "OpenIDCClient", client),
+    OAUTH2_NGINX_CMD(12, openidc, "OpenIDCSession", session),
+    OAUTH2_NGINX_CMD(123, openidc, "OpenIDCProviderResolver",
+		     provider_resolver),
+    OAUTH2_NGINX_CMD(2, openidc, "OpenIDCClaim", claim),
+    ngx_null_command};
 
 static ngx_int_t ngx_openidc_post_config(ngx_conf_t *cf);
+
+// clang-format off
 
 static ngx_http_module_t ngx_openidc_module_ctx = {
 		NULL,						/* preconfiguration              */
