@@ -182,21 +182,20 @@ OAUTH2_NGINX_CFG_FUNC_ARGS1(openidc, ngx_openidc_cfg_t, passphrase,
 			    oauth2_crypto_passphrase_set, NULL)
 OAUTH2_NGINX_CFG_FUNC_ARGS2(openidc, ngx_openidc_cfg_t, cache,
 			    oauth2_cfg_set_cache, NULL)
-OAUTH2_NGINX_CFG_FUNC_ARGS3(openidc, ngx_openidc_cfg_t, provider_resolver,
+OAUTH2_NGINX_CFG_FUNC_ARGS3(openidc, ngx_openidc_cfg_t, provider,
 			    oauth2_cfg_openidc_provider_resolver_set_options,
 			    cfg->openidc)
-OAUTH2_NGINX_CFG_FUNC_ARGS2(openidc, ngx_openidc_cfg_t, client,
+OAUTH2_NGINX_CFG_FUNC_ARGS3(openidc, ngx_openidc_cfg_t, client,
 			    oauth2_openidc_client_set_options, cfg->openidc)
 OAUTH2_NGINX_CFG_FUNC_ARGS2(openidc, ngx_openidc_cfg_t, session,
 			    oauth2_cfg_session_set_options, NULL)
 
 static ngx_command_t ngx_openidc_commands[] = {
     OAUTH2_NGINX_CMD(1, openidc, "OpenIDCCryptoPassphrase", passphrase),
-    OAUTH2_NGINX_CMD(12, openidc, "OAuth2Cache", cache),
-    OAUTH2_NGINX_CMD(12, openidc, "OpenIDCClient", client),
+    OAUTH2_NGINX_CMD(12, openidc, "OpenIDCCache", cache),
+    OAUTH2_NGINX_CMD(23, openidc, "OpenIDCClient", client),
     OAUTH2_NGINX_CMD(12, openidc, "OpenIDCSession", session),
-    OAUTH2_NGINX_CMD(123, openidc, "OpenIDCProviderResolver",
-		     provider_resolver),
+    OAUTH2_NGINX_CMD(23, openidc, "OpenIDCProvider", provider),
     OAUTH2_NGINX_CMD(2, openidc, "OpenIDCClaim", claim),
     ngx_null_command};
 

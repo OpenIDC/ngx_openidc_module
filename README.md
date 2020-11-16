@@ -7,14 +7,23 @@ variables based on the information provided in the ID Token and returned from th
 
 TODO
 
-`OpenIDCProviderResolver`  
-configures the provider settings from a JSON file
+`OpenIDCProvider`  
+Configures the OpenID Connect Provider settings.
 
 `OpenIDCClient`  
-configures the client settings from a form-encoded string
+Configures the OpenID Connect Client settings.
 
 `OpenIDCClaim`  
-populates configuration variables based on available claims
+Populates configuration variables based on available claims.
+
+`OpenIDCCryptoPassphrase`
+Set the passphrase used for encryption of cache, cookies, state etc.
+
+`OpenIDCCache`
+Configures a (default or named) cache backend.
+
+`OpenIDCSession`
+Configures the session type and options, e.g. cache/cookie, session duration, etc.
 
 ```nginx
  ```
@@ -24,8 +33,8 @@ populates configuration variables based on available claims
 ```nginx
       location /openid-connect {
             # reference to provider Discovery metadata
-            OpenIDCProviderResolver file /etc/nginx/conf.d/provider.json;
-            OpenIDCClient openidc0 client_id=openidc0&client_secret=secret&scope=openid%20profile&token_endpoint_auth_method=client_secret_basic&ssl_verify=false;
+            OpenIDCProvider file /etc/nginx/conf.d/provider.json;
+            OpenIDCClient string client_id=openidc0&client_secret=secret&scope=openid%20profile&token_endpoint_auth_method=client_secret_basic ssl_verify=false;
 
             OpenIDCClaim sub $pfc_claim_sub;
 
