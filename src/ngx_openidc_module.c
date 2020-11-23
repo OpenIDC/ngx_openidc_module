@@ -308,32 +308,6 @@ static void ngx_set_target_variables(ngx_openidc_cfg_t *cfg,
 	}
 }
 
-bool oauth2_nginx_response_header_set(oauth2_log_t *log, void *rec,
-				      const char *name, const char *value)
-{
-	bool rc = false;
-	ngx_table_elt_t *h = NULL;
-	ngx_http_request_t *r = (ngx_http_request_t *)rec;
-
-	h = ngx_list_push(&r->headers_out.headers);
-	if (h == NULL)
-		goto end;
-
-	h->hash = 1;
-	h->key.len = strlen(name);
-	h->key.data = ngx_palloc(r->pool, h->key.len);
-	memcpy(h->key.data, name, h->key.len);
-	h->value.len = strlen(value);
-	h->value.data = ngx_palloc(r->pool, h->value.len);
-	memcpy(h->value.data, value, h->value.len);
-
-	rc = true;
-
-end:
-
-	return rc;
-}
-
 static ngx_int_t ngx_openidc_handler(ngx_http_request_t *r)
 {
 	ngx_int_t rv = NGX_DECLINED;
@@ -396,16 +370,7 @@ static ngx_int_t ngx_openidc_handler(ngx_http_request_t *r)
 
 	ngx_set_target_variables(cfg, ctx, claims);
 
-	// TODO: why can we not use the functions from nginx.h (static
-	// functions? dynamic linking?)
-	oauth2_http_response_headers_loop(ctx->log, response,
-					  oauth2_nginx_response_header_set, r);
-	r->headers_out.status =
-	    oauth2_http_response_status_code_get(ctx->log, response);
-
-	// rv = ngx_http_send_header(r);
-
-	// rv = oauth2_nginx_http_response_set(ctx->log, response, r);
+	oauth2_nginx_http_response_set(ctx->log, response, r);
 
 	rv = (r->headers_out.status == 302) ? NGX_HTTP_MOVED_TEMPORARILY
 					    : NGX_OK;
