@@ -187,6 +187,8 @@ OAUTH2_NGINX_CFG_FUNC_ARGS3(openidc, ngx_openidc_cfg_t, provider,
 			    cfg->openidc)
 OAUTH2_NGINX_CFG_FUNC_ARGS3(openidc, ngx_openidc_cfg_t, client,
 			    oauth2_openidc_client_set_options, cfg->openidc)
+OAUTH2_NGINX_CFG_FUNC_ARGS1(openidc, ngx_openidc_cfg_t, config,
+			    oauth2_cfg_openidc_set_options, cfg->openidc)
 OAUTH2_NGINX_CFG_FUNC_ARGS2(openidc, ngx_openidc_cfg_t, session,
 			    oauth2_cfg_session_set_options, NULL)
 
@@ -196,6 +198,7 @@ static ngx_command_t ngx_openidc_commands[] = {
     OAUTH2_NGINX_CMD(23, openidc, "OpenIDCClient", client),
     OAUTH2_NGINX_CMD(12, openidc, "OpenIDCSession", session),
     OAUTH2_NGINX_CMD(23, openidc, "OpenIDCProvider", provider),
+    OAUTH2_NGINX_CMD(1, openidc, "OpenIDCConfig", config),
     OAUTH2_NGINX_CMD(2, openidc, "OpenIDCClaim", claim),
     ngx_null_command};
 
