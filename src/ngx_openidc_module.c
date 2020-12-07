@@ -373,10 +373,7 @@ static ngx_int_t ngx_openidc_handler(ngx_http_request_t *r)
 
 	ngx_set_target_variables(cfg, ctx, claims);
 
-	oauth2_nginx_http_response_set(ctx->log, response, r);
-
-	rv = (r->headers_out.status == 302) ? NGX_HTTP_MOVED_TEMPORARILY
-					    : NGX_OK;
+	rv = oauth2_nginx_http_response_set(ctx->log, response, r);
 
 end:
 
