@@ -61,7 +61,7 @@ static void *ngx_openidc_create_loc_conf(ngx_conf_t *cf)
 	ngx_openidc_cfg_t *cfg = NULL;
 	ngx_pool_cleanup_t *cln = NULL;
 
-	cfg = ngx_pnalloc(cf->pool, sizeof(ngx_openidc_cfg_t));
+	cfg = ngx_pcalloc(cf->pool, sizeof(ngx_openidc_cfg_t));
 	cfg->log = NULL;
 	cfg->cf = cf;
 
@@ -140,7 +140,7 @@ static char *ngx_openidc_set_claim(ngx_conf_t *cf, ngx_command_t *cmd,
 
 	value = cf->args->elts;
 
-	claim = ngx_pnalloc(cf->pool, sizeof(ngx_openidc_claim_t));
+	claim = ngx_pcalloc(cf->pool, sizeof(ngx_openidc_claim_t));
 	claim->name = oauth2_strndup((const char *)value[1].data, value[1].len);
 	claim->value = NULL;
 

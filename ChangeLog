@@ -1,3 +1,6 @@
+06/03/2021
+- use ngx_pcalloc instead of ngx_pnalloc to align memory access
+
 12/22/2020
 - depend on liboauth2 1.4.0
 - release 3.2.0
