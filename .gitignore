@@ -21,3 +21,6 @@
 /nginx.conf
 /.autotools
 /.settings
+/config.guess~
+/config.sub~
+/configure~
