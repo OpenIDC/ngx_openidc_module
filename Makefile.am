@@ -24,4 +24,8 @@ clang-format:
 	clang-format -style=file -i `find . -name *.[ch]`
 
 install:
-	sudo cp .libs/@PACKAGE_NAME@.so  /usr/local/nginx/modules/
+	${INSTALL} -d $(DESTDIR)/usr/local/nginx/modules/
+	${INSTALL} -p -m 755 .libs/@PACKAGE_NAME@.so $(DESTDIR)/usr/local/nginx/modules/@PACKAGE_NAME@.so
+
+uninstall:
+	rm -f $(DESTDIR)/usr/local/nginx/modules/@PACKAGE_NAME@.so

@@ -1,3 +1,8 @@
+12/06/2022
+- change Makefile install procedure
+- depend on liboauth 1.4.5.2
+- release 3.3.0
+
 06/07/2021
 - depend on liboauth 1.4.2 so it works on SPARC64; see https://github.com/zmartzone/ngx_oauth2_module/issues/2
 - release 3.2.1
