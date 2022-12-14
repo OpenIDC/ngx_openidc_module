@@ -1,4 +1,4 @@
-AC_INIT([ngx_openidc_module],[3.3.0],[hans.zandbelt@zmartzone.eu])
+AC_INIT([ngx_openidc_module],[3.3.1dev],[hans.zandbelt@zmartzone.eu])
 
 AM_INIT_AUTOMAKE([foreign no-define subdir-objects])
 AC_CONFIG_MACRO_DIRS([m4])
@@ -25,11 +25,11 @@ AM_CONDITIONAL(HAVE_NGINX, [test x"$have_nginx" = "xyes"])
 AC_SUBST(NGINX_CFLAGS)
 AC_SUBST(NGINX_LIBS)
 
-PKG_CHECK_MODULES(OAUTH2, [liboauth2 >= 1.4.5.2])
+PKG_CHECK_MODULES(OAUTH2, [liboauth2 >= 1.4.5.3])
 AC_SUBST(OAUTH2_CFLAGS)
 AC_SUBST(OAUTH2_LIBS)
 
-PKG_CHECK_MODULES(OAUTH2_NGINX, [liboauth2_nginx >= 1.4.5.2])
+PKG_CHECK_MODULES(OAUTH2_NGINX, [liboauth2_nginx >= 1.4.5.3])
 AC_SUBST(OAUTH2_NGINX_CFLAGS)
 AC_SUBST(OAUTH2_NGINX_LIBS)
 

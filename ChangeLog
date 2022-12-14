@@ -1,3 +1,7 @@
+12/14/2022
+- remove hardcoded http schema and depend on liboauth 1.4.5.3 with the fix for https request scheme detection
+- bump to 3.3.1dev
+
 12/06/2022
 - change Makefile install procedure
 - depend on liboauth 1.4.5.2

@@ -339,8 +339,6 @@ static ngx_int_t ngx_openidc_handler(ngx_http_request_t *r)
 		goto end;
 	}
 
-	oauth2_http_request_scheme_set(ctx->log, ctx->request, "http");
-
 	/*
 	char *v = NULL;
 	if (r->uri.len > 0) {
