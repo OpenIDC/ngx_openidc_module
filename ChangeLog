@@ -1,3 +1,7 @@
+01/22/2023
+- depend on liboauth 1.4.5.4
+- release 3.3.1
+
 12/14/2022
 - remove hardcoded http schema and depend on liboauth 1.4.5.3 with the fix for https request scheme detection
 - bump to 3.3.1dev
