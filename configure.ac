@@ -1,4 +1,4 @@
-AC_INIT([ngx_openidc_module],[3.3.1],[hans.zandbelt@zmartzone.eu])
+AC_INIT([ngx_openidc_module],[3.3.1],[hans.zandbelt@openidc.com])
 
 AM_INIT_AUTOMAKE([foreign no-define subdir-objects])
 AC_CONFIG_MACRO_DIRS([m4])
