@@ -26,7 +26,7 @@ jobs:
         ln -s nginx-${NGINX_VERSION} nginx
         cd /tmp/nginx && ./configure --with-debug
         cd /tmp        
-        git clone https://github.com/zmartzone/liboauth2.git
+        git clone https://github.com/OpenIDC/liboauth2.git
         cd liboauth2
         ./autogen.sh
         ./configure --with-nginx=/tmp/nginx
