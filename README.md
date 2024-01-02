@@ -28,6 +28,9 @@ Configures a (default or named) cache backend.
 `OpenIDCSession`
 Configures the session type and options, e.g. cache/cookie, session duration, etc.
 
+`OpenIDCConfig`
+Configures global setting such as redirect URI, etc.
+
 ```nginx
  ```
 
