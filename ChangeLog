@@ -1,3 +1,7 @@
+06/02/2024
+- don't include standard headers before NGINX headers; see OpenIDC/ngx_sts_module#2
+  avoid compilation error with NGINX 1.26.0: field 'pkt6' has incomplete type
+
 03/08/2023
 - move repo to OpenIDC github organization
 
