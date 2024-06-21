@@ -9,7 +9,8 @@ AM_LDFLAGS = --coverage
 
 LDADD = $(CODE_COVERAGE_LIBS)
 
-lib_LTLIBRARIES = @PACKAGE_NAME@.la
+pkglib_LTLIBRARIES = @PACKAGE_NAME@.la
+pkglibdir = $(libdir)/nginx/modules
 
 @PACKAGE_NAME@_la_CFLAGS = @OAUTH2_CFLAGS@ @OAUTH2_NGINX_CFLAGS@ @NGINX_CFLAGS@
 @PACKAGE_NAME@_la_LIBADD = @OAUTH2_LIBS@ @OAUTH2_NGINX_LIBS@ @NGINX_LIBS@
@@ -22,10 +23,3 @@ lib_LTLIBRARIES = @PACKAGE_NAME@.la
 
 clang-format:
 	clang-format -style=file -i `find . -name *.[ch]`
-
-install:
-	${INSTALL} -d $(DESTDIR)/usr/local/nginx/modules/
-	${INSTALL} -p -m 755 .libs/@PACKAGE_NAME@.so $(DESTDIR)/usr/local/nginx/modules/@PACKAGE_NAME@.so
-
-uninstall:
-	rm -f $(DESTDIR)/usr/local/nginx/modules/@PACKAGE_NAME@.so

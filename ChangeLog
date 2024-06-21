@@ -1,3 +1,6 @@
+06/21/2024
+- Makefile.am: use pkglib_LTLIBRARIES
+
 06/05/2024
 - depend on liboauth2 >= 1.6.2
 - release 3.4.0
