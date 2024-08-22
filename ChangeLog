@@ -1,3 +1,8 @@
+08/22/2024
+- change LICENSE to Apache 2.0
+- depend on liboauth2 >= 2.0.0
+- release 4.0.0
+
 06/21/2024
 - Makefile.am: use pkglib_LTLIBRARIES
 
