@@ -27,7 +27,7 @@ OpenIDCProvider url https://accounts.google.com/.well-known/openid-configuration
 
 ### OpenIDCClient
 
-`OpenIDCClient (string|json|file) <client-config> [ssl_verify=on|off];`
+`OpenIDCClient (string|json|file) <client-config> [ssl_verify=on|off][&http_timeout=<ms>][&http_retries=<n>][&http_retry_interval=<ms>];`
 
 Configures the OpenID Connect Client settings. The `client-config` can be provided as a `string` that is form-encoded (eg. `key1=value1&key2=value2`), a `json` string, or a local `file` containing a JSON object.  The keys that are required to be set in the config are:
 
